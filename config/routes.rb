@@ -1,4 +1,14 @@
 Rails.application.routes.draw do
+  post '/enter'             => 'chat_rooms#enter'
+
+  post '/leave'             => 'chat_rooms#leave'
+
+  post '/message'           => 'chat_rooms#message'
+
+
+
+  root 'chat_rooms#index'
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

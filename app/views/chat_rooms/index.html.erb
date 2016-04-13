@@ -1,0 +1,177 @@
+<style>
+    #panel {
+        position: fixed;
+        bottom: 0;
+        background-color: #FFFFFF;
+    }
+
+    #panel form {
+        margin-bottom: 4px;
+    }
+
+    #panel button, #panel textarea {
+        height: 40px
+    }
+
+    #panel button {
+        width: 100px;
+        vertical-align: top;
+    }
+
+    #messages {
+        padding-bottom: 40px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    #users {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 160px;
+        background-color: #fafafa;
+        height: 100%;
+        border-left: 1px solid #dfdfdf;
+        padding: 5px;
+    }
+
+    #users ul li {
+        margin: 0;
+        padding: 0;
+    }
+
+    #users ul li.me {
+        font-weight: bold;
+    }
+
+    #users ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        padding-right: 160px;
+    }
+</style>
+
+<p>This is a trivial <a href="https://github.com/SamSaffron/message_bus">message_bus</a> chat demo... It is implemented as a RAILS 4.1 app backed by Postgresql (no REDIS)</p>
+<p>Original app is <a href="https://github.com/SamSaffron/message_bus/blob/master/examples/chat/chat.rb">here</a></p>
+<br/>
+<div id='messages' class="hidden"></div>
+<div id='users' class="hidden">
+  <h3>Online</h3>
+  <ul></ul>
+</div>
+<div id='panel' class="hidden">
+  <form>
+    <textarea cols=80 rows=2></textarea>
+    <button id="send">send</button>
+  </form>
+</div>
+<div id='your-username'>Enter your username: <input type='text'> </div>
+
+  <script>
+      $(function () {
+          var username;
+
+          jQuery.fn.exists = function(){return ($(this).length > 0);}
+
+
+          MessageBus.ajax = function (args) {
+              args["headers"]["X-username"] = username;
+              return $.ajax(args);
+          };
+
+          var enter = function (username, opts) {
+
+              var li = $('#users ul').find("li[data-name='"+ username +"']").detach();
+              if (! li.exists() ) {
+                  li = $('<li></li>');
+                  li.text(username);
+                  li.attr('data-name', username);
+              }
+
+              if (opts && opts.me) {
+                  li.addClass("me");
+                  $('#users ul').prepend(li);
+              } else {
+                  $('#users ul').append(li);
+              }
+          };
+
+          $('#messages, #panel').addClass('hidden');
+
+          $('#your-username input').keyup(function (e) {
+              if (e.keyCode == 13) {
+                  var newname = $(this).val();
+                  $.post("/enter", { username: newname}, null, "json").success(function (data) {
+                      //initial load of users on presence list
+                      $.each(data.users, function (uname, utime) {
+                          enter(uname, { me: (uname==newname) }  );
+                      });
+                      //initial set for global username
+                      username = data.username;
+                  });
+                  $('#your-username').addClass('hidden');
+                  $('#messages, #panel, #users').removeClass('hidden');
+                  $(document.body).scrollTop(document.body.scrollHeight);
+
+                  window.onbeforeunload = function () {
+                      $.post("/leave", { username: username });
+                  };
+
+                  MessageBus.subscribe("/presence", function (msg) {
+                      if (msg.enter) {
+                          enter(msg.enter , {me: (msg.enter==username)});
+                      }
+                      if (msg.leave) {
+                          $('#users ul li').each(function () {
+                              if ($(this).text() === msg.leave) {
+                                  $(this).remove()
+                              }
+                          });
+                      }
+                  });
+              }
+          });
+
+          var safe = function (html) {
+              return String(html).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+          };
+
+          MessageBus.subscribe("/message", function (msg) {
+              $('#messages').append("<p>" + safe(msg.username) + " said: " + safe(msg.data) + "</p>");
+              $(document.body).scrollTop(document.body.scrollHeight);
+          }, 0); // last id is zero, so getting backlog
+
+          var submit = function () {
+              var val = $('form textarea').val().trim();
+              if (val.length === 0) {
+                  return;
+              }
+
+              if (val.length > 500) {
+                  alert("message too long");
+                  return false;
+              } else {
+                  $.post("/message", { data: val, username: username});
+              }
+              $('textarea').val("");
+          };
+
+          $('#send').click(function () {
+              submit();
+              return false;
+          });
+
+          $('textarea').keyup(function (e) {
+              if (e.keyCode == 13) {
+                  submit();
+              }
+          });
+
+      });
+  </script>

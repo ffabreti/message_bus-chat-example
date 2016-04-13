@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  last_id: 1
+  last_message: MyString
+
+two:
+  last_id: 1
+  last_message: MyString

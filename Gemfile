@@ -38,3 +38,8 @@ gem 'spring',        group: :development
 # Use debugger
 # gem 'debugger', group: [:development, :test]
 
+gem 'puma'
+
+gem 'message_bus', ">= 1.1.1.beta"
+
+
