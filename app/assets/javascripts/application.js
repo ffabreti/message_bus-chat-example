@@ -15,4 +15,4 @@
 //  require turbolinks
 //  require_tree .
 //= require message-bus
-//= require chat_rooms
+

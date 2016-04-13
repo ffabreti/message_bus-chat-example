@@ -37,11 +37,7 @@ class ChatRoomsController < ApplicationController
 
             MessageBus.publish '/message', msg
 
-            respond_to do |format|
-                format.js {
-                    render string: "OK"
-                }
-            end
+            render body: "OK"
 
         end
 
