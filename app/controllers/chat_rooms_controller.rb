@@ -9,11 +9,8 @@ class ChatRoomsController < ApplicationController
 
         MessageBus.publish '/presence', {enter: @user.username}
 
-        respond_to do |format|
-            format.js {
-                render json: {users: $online, username: @user.username}
-            }
-        end
+        render json: {username: @user.username, users: $online }
+
 
     end
 
@@ -28,6 +25,8 @@ class ChatRoomsController < ApplicationController
 
         end
 
+        render body: "leave:OK"
+
     end
 
     def message
@@ -37,7 +36,7 @@ class ChatRoomsController < ApplicationController
 
             MessageBus.publish '/message', msg
 
-            render body: "OK"
+            render body: "message:OK"
 
         end
 
