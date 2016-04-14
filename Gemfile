@@ -40,6 +40,7 @@ gem 'spring',        group: :development
 
 gem 'puma'
 
-gem 'message_bus', ">= 1.1.1.beta"
+#gem 'message_bus', ">= 1.1.1.beta"
+gem 'message_bus', git: 'https://github.com/SamSaffron/message_bus.git'
 
 
