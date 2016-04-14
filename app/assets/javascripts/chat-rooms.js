@@ -71,7 +71,7 @@ $( document ).ready(function() {
 
     MessageBus.subscribe("/message", function (msg) {
         $('#messages').append("<p>" + safe(msg.username) + " said: " + safe(msg.data) + "</p>");
-        $(document.body).scrollTop(document.body.scrollHeight);
+        $(window).scrollTop(document.body.scrollHeight);
     }, 0); // last id is zero, so getting backlog
 
     var submit = function () {
