@@ -43,4 +43,7 @@ gem 'puma'
 #gem 'message_bus', ">= 1.1.1.beta"
 gem 'message_bus', git: 'https://github.com/SamSaffron/message_bus.git'
 
+gem 'passenger', '~> 4.0.52', group: :development  #aws dont need it: http://serverfault.com/a/721020/116341 (chris finne comment)
+
+
 

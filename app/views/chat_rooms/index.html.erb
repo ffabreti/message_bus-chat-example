@@ -1,75 +1,114 @@
 <style>
+
+    * {
+        position: relative;
+        margin: 0;
+        padding: 0;
+    }
+
+    #panel, #main, #users, #header {
+        position: fixed;
+        width: calc(100% - 160px);
+    }
     #panel {
-        position: fixed;
         bottom: 0;
-        background-color: #FFFFFF;
+        height: 40px;
+        background-color: lightcyan;
+        width: calc(100% - 160px);
     }
-
-    #panel form {
-        margin-bottom: 4px;
+    #panel textarea {
+        width: calc(90% - 70px);
+        height: 40px;
     }
-
-    #panel button, #panel textarea {
-        height: 40px
-    }
-
     #panel button {
-        width: 100px;
+        width: 60px;
         vertical-align: top;
+        height: 100%;
+        height: 40px;
     }
-
+    #header {
+        height: 110px;
+        top:0;
+        width: calc(100% - 160px);
+        background-color: lightblue;
+    }
+    #header p, #messages p, #users {
+        padding: 5px;
+    }
+    #main {
+        top: 110px;
+        bottom: 40px;
+        width: calc(100% - 160px);
+        overflow-y: scroll;
+        background-color: lightcyan;
+    }
     #messages {
-        padding-bottom: 40px;
+        height: 100%;
     }
-
-    .hidden {
-        display: none;
-    }
-
     #users {
-        position: fixed;
         top: 0;
         right: 0;
         width: 160px;
         background-color: #fafafa;
         height: 100%;
-        border-left: 1px solid #dfdfdf;
-        padding: 5px;
+        overflow: scroll;
     }
-
-    #users ul li {
-        margin: 0;
-        padding: 0;
-    }
-
-    #users ul li.me {
+    #users ul li.me, #messages p.me {
         font-weight: bold;
     }
-
     #users ul {
         list-style: none;
-        margin: 0;
-        padding: 0;
     }
-
     body {
         padding-right: 160px;
     }
 </style>
 
-<p>This is a trivial <a href="https://github.com/SamSaffron/message_bus">message_bus</a> chat demo... It is implemented as a RAILS 4.1 app backed by Postgresql (no REDIS)</p>
-<p>Original app is <a href="https://github.com/SamSaffron/message_bus/blob/master/examples/chat/chat.rb">here</a></p>
-<br/>
-<div id='messages' class="hidden"></div>
-<div id='users' class="hidden">
-  <h3>Online</h3>
-  <ul></ul>
+<div ng-app="App" ng-controller="ChatController">
+
+    <div id="header">
+        <p> This is a trivial
+        <a href="https://github.com/SamSaffron/message_bus">message_bus</a> chat demo with angularJS ...
+        It is implemented as a RAILS 4.1 app backed by Postgresql (no REDIS)</p>
+        <p>Original app is <a href="https://github.com/SamSaffron/message_bus/blob/master/examples/chat/chat.rb">here</a></p>
+        <p>mesage-bus.js was converted to message-bus-angular.js <a href="https://github.com/ffabreti">diff here</a></p>
+    </div>
+    <div id="main" scroll-bottom-on="remoteMessages">
+        <form ng-submit="doLogin()" ng-show="!username">
+            Enter your username: <input ng-model="name" type='text'>
+        </form>
+
+        <div id='messages' ng-show="username" >
+
+            <p ng-repeat="remoteMessage in remoteMessages"
+               ng-class="{me: remoteMessage.username==username }">
+                {{remoteMessage.username}} said: {{remoteMessage.data}}
+            </p>
+
+        </div>
+    </div>
+
+    <div id='users' ng-show="username" scroll-bottom-on="users">
+
+        <h3>Online Users</h3>
+        <br/>
+        <ul ng-repeat="user in users">
+            <li ng-class="{me: user==username }">{{user}}</li>
+        </ul>
+
+    </div>
+
+
+    <div id='panel' ng-show="username">
+
+        <form ng-submit="sendMessage()">
+            <textarea ng-model="message" cols=80 rows=2></textarea>
+            <button id="send" ng-disabled="!message">send</button>
+        </form>
+
+    </div>
+
+
+
 </div>
-<div id='panel' class="hidden">
-  <form>
-    <textarea cols=80 rows=2></textarea>
-    <button id="send">send</button>
-  </form>
-</div>
-<div id='your-username'>Enter your username: <input type='text'> </div>
 

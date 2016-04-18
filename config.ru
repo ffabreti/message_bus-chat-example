@@ -19,4 +19,8 @@ require ::File.expand_path('../config/environment',  __FILE__)
         end
     end
 
+#MessageBus.long_polling_interval = 1000 * 2
+MessageBus.max_active_clients = 10000
+use MessageBus::Rack::Middleware
+
 run Rails.application

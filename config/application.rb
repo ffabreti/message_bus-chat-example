@@ -21,3 +21,6 @@ module MessagebusChat
     # config.i18n.default_locale = :de
   end
 end
+
+ActiveRecord::Base.logger = Logger.new(STDOUT) if Rails.env == 'fake_production'
+

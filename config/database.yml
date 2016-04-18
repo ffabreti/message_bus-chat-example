@@ -19,7 +19,7 @@ default: &default
   encoding: unicode
   # For details on connection pooling, see rails configuration guide
   # http://guides.rubyonrails.org/configuring.html#database-pooling
-  pool: 10
+  pool: 200
 
 development:
   <<: *default
@@ -27,7 +27,7 @@ development:
   username: messagebus-chat
   password: 123456
 
-fake-production:
+fake_production:
   <<: *default
   database: messagebus-chat_development
   username: messagebus-chat
