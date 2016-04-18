@@ -1,11 +1,61 @@
 /*jshint bitwise: false*/
-(function (global, document, undefined) {
+
+(function(global, document, undefined) {
     'use strict';
+
+angular.module('MessageBus', [])
+
+/* $http does not provide a way to access xhr object directly (not until angular 1.5.5)
+   this decorator provides a way to set a custom header on $http config whose only
+   purpose is to grab xhr object and, for example, define listeners on it.
+   usage:
+        $http({
+              method: 'PUT',
+              url: `files/user/private/${file.name}`,
+              data: 'the file object',
+              headers: {
+                  'Content-Type': 'application/blablabla',
+
+                  __XHR__: function() {
+                      return function(xhr) {
+                          // here you can access the XHR
+                          xhr.upload.addEventListener("progress", function(event) {
+                              upload_callback(event.loaded, event.total);
+                          });
+                      };
+                  }
+              }
+        });
+   Reference:
+        https://github.com/angular/angular.js/pull/11547#issuecomment-203157445
+ */
+.decorator("$xhrFactory", function($delegate, $rootScope) {
+    'ngInject';
+
+    return function(method, url) {
+        var xhr = $delegate(method, url);
+
+        xhr.setRequestHeader = (function(sup) {
+            return function(header, value) {
+                if ((header === "__XHR__") && angular.isFunction(value))
+                    value(this);  //callback: this is xhr
+                else
+                    sup.apply(this, arguments);
+            };
+        })(xhr.setRequestHeader);
+
+        return xhr;
+    };
+})
+
+.factory('MessageBus', function ($http) {
+
+
     var previousMessageBus = global.MessageBus;
 
     // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
     var callbacks, clientId, failCount, shouldLongPoll, queue, responseCallbacks, uniqueId, baseUrl;
-    var me, started, stopped, longPoller, pollTimeout, paused, later, jQuery, interval, chunkedBackoff;
+    var me, started, stopped, longPoller, pollTimeout, paused, later, angularJS, interval, chunkedBackoff;
 
     uniqueId = function () {
         return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -26,7 +76,7 @@
     paused = false;
     later = [];
     chunkedBackoff = 0;
-    jQuery = global.jQuery;
+    angularJS = global.angular;
     var hiddenProperty;
 
     (function () {
@@ -156,7 +206,7 @@
 
         var disableChunked = function () {
             if (me.longPoll) {
-                me.longPoll.abort();
+                me.longPoll.resolve();
                 chunkedBackoff = 30;
             }
         };
@@ -177,41 +227,32 @@
             }
         };
         if (!me.ajax) {
-            throw new Error("Either jQuery or the ajax adapter must be loaded");
+            throw new Error("AngularJS and $http must be loaded");
         }
         var req = me.ajax({
             url: me.baseUrl + "message-bus/" + me.clientId + "/poll" + (!longPoll ? "?dlp=t" : ""),
             data: data,
             cache: false,
             dataType: dataType,
-            type: 'POST',
-            headers: headers,
-            messageBus: {
-                chunked: chunked,
-                onProgressListener: function (xhr) {
-                    var position = 0;
-                    // if it takes longer than 3000 ms to get first chunk, we have some proxy
-                    // this is messing with us, so just backoff from using chunked for now
-                    var chunkedTimeout = setTimeout(disableChunked, 3000);
-                    return xhr.onprogress = function () {
-                        clearTimeout(chunkedTimeout);
-                        if (xhr.getResponseHeader('Content-Type') === 'application/json; charset=utf-8') {
-                            chunked = false; // not chunked, we are sending json back
-                        } else {
-                            position = handle_progress(xhr.responseText, position);
-                        }
+            method: 'POST',
+            headers: angular.merge( {}, headers, { __XHR__: function () {
+                return function (xhr) {
+                    if (!chunked) {
+                        return xhr;
                     }
-                }
-            },
-            xhr: function () {
-                var xhr = jQuery.ajaxSettings.xhr();
-                if (!chunked) {
+                    onProgress(xhr);
                     return xhr;
-                }
-                this.messageBus.onProgressListener(xhr);
-                return xhr;
-            },
-            success: function (messages) {
+                };
+            }
+            })
+        });
+
+        req
+            .then(onSuccess, onError)
+            .finally(onComplete);
+
+        //----- local functions -----
+        function onSuccess(messages) {
                 if (!chunked) {
                     // we may have requested text so jQuery will not parse
                     if (typeof(messages) === "string") {
@@ -219,16 +260,30 @@
                     }
                     gotData = reqSuccess(messages);
                 }
-            },
-            error: function (xhr, textStatus, err) {
+            }
+        function onError(xhr, textStatus, err) {
                 if (textStatus === "abort") {
                     aborted = true;
                 } else {
                     failCount += 1;
                     totalAjaxFailures += 1;
                 }
-            },
-            complete: function () {
+        }
+        function onProgress(xhr) {
+            var position = 0;
+            // if it takes longer than 3000 ms to get first chunk, we have some proxy
+            // this is messing with us, so just backoff from using chunked for now
+            var chunkedTimeout = setTimeout(disableChunked, 3000);
+            return xhr.onprogress = function () {
+                clearTimeout(chunkedTimeout);
+                if (xhr.getResponseHeader('Content-Type') === 'application/json; charset=utf-8') {
+                    chunked = false; // not chunked, we are sending json back
+                } else {
+                    position = handle_progress(xhr.responseText, position);
+                }
+            }
+        }
+        function onComplete() {
                 var interval;
                 try {
                     if (gotData || aborted) {
@@ -262,7 +317,6 @@
                 }, interval);
                 me.longPoll = null;
             }
-        });
 
         return req;
     };
@@ -277,7 +331,7 @@
         clientId: clientId,
         alwaysLongPoll: false,
         baseUrl: baseUrl,
-        ajax: (jQuery && jQuery.ajax),
+        ajax: (angular && $http),
         noConflict: function () {
             global.MessageBus = global.MessageBus.previousMessageBus;
             return this;
@@ -369,7 +423,7 @@
                 last_id: lastId
             });
             if (me.longPoll) {
-                me.longPoll.abort();
+                me.longPoll.resolve();
             }
 
             return func;
@@ -410,11 +464,13 @@
             }
 
             if (removed && me.longPoll) {
-                me.longPoll.abort();
+                me.longPoll.resolve();
             }
 
             return removed;
         }
     };
-    global.MessageBus = me;
+
+    return me;
+});
 })(window, document);
