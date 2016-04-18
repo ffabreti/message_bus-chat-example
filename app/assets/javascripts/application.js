@@ -14,6 +14,6 @@
 //= require jquery_ujs
 //  require turbolinks
 //  require_tree .
-//= require message-bus
+//= require message-bus-angular
 //= require chat-rooms.js
 
