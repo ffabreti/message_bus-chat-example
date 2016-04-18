@@ -19,17 +19,20 @@ There is no Jquery dependency. You can find [a initial diff here](https://github
 
 `git clone -b angularJS https://github.com/ffabreti/message_bus-chat-example.git`
 
-### 2) Bundle it
+### 2) Install Postgres 9
+> You may find [more info here](https://wiki.postgresql.org/wiki/Detailed_installation_guides) 
+
+### 3) Bundle it
 `$ bundle install`
 
-### 3) Migrate it
+### 4) Migrate it
 `$ rake db:migrate`
 
-### 4) Run Rails Server
+### 5) Run Rails Server
 > You may want to run the fake_production environment so that you get thread safe, puma threads, concurrency, etc
 
 `$ rails server -e fake_production` or `$ passenger start -e fake_production`
 
-### 5) Run Clients
+### 6) Run Clients
 Open up 2 different browsers and point then to `http://localhost:3000`
 
