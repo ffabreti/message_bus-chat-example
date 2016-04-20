@@ -16,9 +16,8 @@ angular.module('App.services', [  ])
         function ($http) {
             var baseURL = 'http://your-production-url.com';
 
-            <% if Rails.env != 'production' %>
-                baseURL = 'http://localhost:3000';
-            <% end %>
+            baseURL = 'http://localhost:3000';
+
 
             var currentUser;
 
@@ -67,7 +66,7 @@ angular.module('App.services', [  ])
                                 {   timeout: 10000,
                                     headers: {
                                         'Content-Type': 'application/json',
-                                        'X-username': username
+                                        'HTTP_X_USERNAME': username
                                     }
                                 }
                         ).then(onSuccess, onError).catch(onCatch);
@@ -110,7 +109,7 @@ angular.module('App.services', [  ])
                                 {   timeout: 10000,
                                     headers: {
                                         'Content-Type': 'application/json',
-                                        'X-username': currentUser
+                                        'HTTP_X_USERNAME': currentUser
                                     }
                                 }
                         ).then(onSuccess, onError).catch(onCatch);
@@ -167,10 +166,15 @@ angular.module('App.services', [  ])
 //------------------------------------------------------------------------------------
 
 angular.module('App').
-    controller("ChatController", function($scope, Chatroom) {
+    controller("ChatController", function($scope, $timeout, Chatroom) {
 
     //------ Local Functions -----------------------------------------------------------
 
+    function updateUI(func) {                  //https://docs.angularjs.org/error/$rootScope/inprog?p0=$digest
+       $scope.$evalAsync(function(scope) {
+            if (func) func();
+       });
+    }
 
     //------ Local Variables -----------------------------------------------------------
 
@@ -183,16 +187,18 @@ angular.module('App').
 
         Chatroom.enter({newname: $scope.name}, function(response){
             if (!response.error) {
-                $scope.$apply(function () {
+
+                updateUI(function(){
                     $scope.users = Object.keys(response.data.users);        //initial load of users on presence list
                     $scope.username = response.data.username;               //initial set for global username
                 });
+
                 window.onbeforeunload = function () {
                     Chatroom.leave($scope.username);
                 };
 
                 Chatroom.onPresence(function(msg){
-                    $scope.$apply(function () {
+                    updateUI(function() {
                         if (msg.enter) {
                             if ($scope.users.indexOf(msg.enter) == -1) {
                                 $scope.users.push(msg.enter);
@@ -203,14 +209,17 @@ angular.module('App').
                             if (idx > -1) $scope.users.splice(idx, 1);
                         }
                     });
+
                 });
 
                 Chatroom.onMessage(function(response){
 
                     if (response.data) {
-                        $scope.remoteMessages.push(response);
+                        updateUI(function(){
+                            $scope.remoteMessages.push(response);
+                        });                                 //directive scroll-bottom-on triggers phase
                     }
-                    if (!$scope.$phase) $scope.$apply();  //directive scroll-bottom-on triggers phase
+
                 });
 
             } else {
