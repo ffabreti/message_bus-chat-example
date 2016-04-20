@@ -8,16 +8,23 @@ MessageBus Repo: https://github.com/SamSaffron/message_bus
 
 ### 1) Download from one branch:
 
->In the master branch,    you find the Jquery version:
+>In the **master branch**,    you find the Jquery version:
 
 `$ git clone -b master    https://github.com/ffabreti/message_bus-chat-example.git`
 
-> In the angularJS branch, you will find the AngularJS version.
+> In the **angularJS branch**, you will find the AngularJS version.
 MessageBus Jquery client was converted to AngularJS.
 There is no Jquery dependency. You can find [a initial diff here](https://github.com/ffabreti/message_bus-chat-example/commit/2cf8a138cdf572868ec64b908ca6d95b127ae774).
 
-
 `git clone -b angularJS https://github.com/ffabreti/message_bus-chat-example.git`
+
+> In the **messageBusAjax-angular** branch, you will find original message-bus.js and the new 
+message-bus-ajax.js which completely eliminates the need for converting code to 
+AngularJS inside the message-bus code.
+Including message-bus-ajax.js will provide a native javascript XMLHttpRequest 
+instead of JQuery.ajax implementation.  
+
+`git clone -b messageBusAjax-angular https://github.com/ffabreti/message_bus-chat-example.git`
 
 ### 2) Install Postgres 9
 > You may find [more info here](https://wiki.postgresql.org/wiki/Detailed_installation_guides) 

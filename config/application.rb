@@ -22,5 +22,5 @@ module MessagebusChat
   end
 end
 
-ActiveRecord::Base.logger = Logger.new(STDOUT) if Rails.env == 'fake_production'
+ActiveRecord::Base.logger = Logger.new(STDOUT) if Rails.env == 'fake_production'   #log SQL queries
 

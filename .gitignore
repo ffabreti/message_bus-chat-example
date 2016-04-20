@@ -15,5 +15,4 @@
 /log/*.log
 /tmp
 
-/app/assets/javascripts/message-bus.js
 .idea/

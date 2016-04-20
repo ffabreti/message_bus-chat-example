@@ -1,4 +1,4 @@
-angular.module("App",    [ 'MessageBus',
+angular.module("App",    [ //'MessageBus',
                            'App.services'
                            //,'ui.bootstrap'
     ])
@@ -13,8 +13,12 @@ angular.module("App",    [ 'MessageBus',
 
 angular.module('App.services', [  ])
     .factory('Chatroom',
-        function ($http, MessageBus) {
-            var baseURL = 'http://localhost:3000';
+        function ($http) {
+            var baseURL = 'http://your-production-url.com';
+
+            <% if Rails.env != 'production' %>
+                baseURL = 'http://localhost:3000';
+            <% end %>
 
             var currentUser;
 
@@ -88,7 +92,7 @@ angular.module('App.services', [  ])
                 },
                 //listen on presence channel
                 onPresence: function(cback) {
-                    MessageBus.subscribe("/presence", function (data) {
+                    window.MessageBus.subscribe("/presence", function (data) {
 
                         if (cback) cback(data);
 
@@ -130,7 +134,7 @@ angular.module('App.services', [  ])
                 },
                 //listen on message endpoint
                 onMessage: function(cback) {
-                    MessageBus.subscribe("/message", function (response) {
+                    window.MessageBus.subscribe("/message", function (response) {
                         if (response.data) {
                             if (cback) cback(response);
                         }
