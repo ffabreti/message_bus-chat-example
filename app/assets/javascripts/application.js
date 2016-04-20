@@ -18,6 +18,8 @@
 // require chat-rooms
 //= require angular.min
 // require ui-bootstrap-tpls
-//= require message-bus-angular
+// require message-bus-angular
+//= require message-bus
+//= require message-bus-ajax
 //= require chatroom-angular
 
