@@ -183,10 +183,10 @@ angular.module('App').
 
         Chatroom.enter({newname: $scope.name}, function(response){
             if (!response.error) {
-
-                $scope.users = Object.keys(response.data.users);        //initial load of users on presence list
-                $scope.username = response.data.username;               //initial set for global username
-
+                $scope.$apply(function () {
+                    $scope.users = Object.keys(response.data.users);        //initial load of users on presence list
+                    $scope.username = response.data.username;               //initial set for global username
+                });
                 window.onbeforeunload = function () {
                     Chatroom.leave($scope.username);
                 };
