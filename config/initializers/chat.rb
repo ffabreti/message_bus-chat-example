@@ -1,6 +1,6 @@
 # see https://github.com/SamSaffron/message_bus/blob/master/examples/chat/chat.rb
 
-require 'message_bus'
+#require 'message_bus'
 #require 'message_bus/backends/postgres'
 
 =begin
@@ -54,7 +54,7 @@ MessageBus.user_id_lookup do |env|
         unless $online[name]
             # we have received a pooling from a client that is not on our online hash
             # let's tell everyone it's online...
-            #MessageBus.publish "/presence", {enter: name}
+            MessageBus.publish "/presence", {enter: name}
         end
         # ... and register it as online
         $online[name] = Time.now

@@ -1,6 +1,6 @@
 class ChatRoomsController < ApplicationController
 
-    use MessageBus::Rack::Middleware
+
 
     def enter
 
