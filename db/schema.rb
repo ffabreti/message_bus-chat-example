@@ -13,9 +13,6 @@
 
 ActiveRecord::Schema.define(version: 20160412193540) do
 
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "plpgsql"
-
   create_table "chat_rooms", force: true do |t|
     t.string   "room_name"
     t.integer  "last_id"
@@ -30,14 +27,5 @@ ActiveRecord::Schema.define(version: 20160412193540) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
-
-  create_table "message_bus", force: true do |t|
-    t.text     "channel",                    null: false
-    t.text     "value",                      null: false
-    t.datetime "added_at", default: "now()", null: false
-  end
-
-  add_index "message_bus", ["added_at"], name: "table_added_at_index", using: :btree
-  add_index "message_bus", ["channel", "id"], name: "table_channel_id_index", using: :btree
 
 end
