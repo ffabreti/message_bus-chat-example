@@ -18,23 +18,28 @@ angular.module('App.services', [  ])
 
             baseURL = 'http://localhost:3000';
 
-
             var currentUser;
+
+            MessageBus.headers['X-username'] = currentUser;
+
+            function setCurrentUser(name) {
+                currentUser = name;
+                MessageBus.headers['X-username'] = currentUser;
+            }
+
 
             var Chatroom = {
                 // post to enter endpoint
                 enter: function(opts, cback) {
                     opts = opts || {};
                     if (!(opts.newname)) throw('missing option: newname');
-
                     try {
-                        $http.post(baseURL + '/enter',
+                        $http.post(baseURL + '/enter',       // Não depende do username no header???
                                 {   username: opts.newname
                                 },
                                 {   timeout: 10000,
                                     headers: {
-                                        'Content-Type': 'application/json',
-                                        'HTTP_X_USERNAME': opts.newname
+                                        'Content-Type': 'application/json'
                                     }
                                 }
                         ).then(onSuccess, onError).catch(onCatch);
@@ -45,7 +50,7 @@ angular.module('App.services', [  ])
                     //----- local functions
                     function onSuccess(response) {
                         response.error = response.error || null;
-                        currentUser = response.data.username;
+                        setCurrentUser(response.data.username);
                         if (cback) cback(response);
                     }
                     function onError(error) {
@@ -65,8 +70,7 @@ angular.module('App.services', [  ])
                                 },
                                 {   timeout: 10000,
                                     headers: {
-                                        'Content-Type': 'application/json',
-                                        'HTTP_X_USERNAME': username
+                                        'Content-Type': 'application/json'
                                     }
                                 }
                         ).then(onSuccess, onError).catch(onCatch);
@@ -77,7 +81,7 @@ angular.module('App.services', [  ])
                     //----- local functions
                     function onSuccess(response) {
                         response.error = response.error || null;
-                        currentUser = null;
+                        setCurrentUser(undefined);
                         if (cback) cback(response);
                     }
                     function onError(error) {
@@ -108,8 +112,7 @@ angular.module('App.services', [  ])
                                 },
                                 {   timeout: 10000,
                                     headers: {
-                                        'Content-Type': 'application/json',
-                                        'HTTP_X_USERNAME': currentUser
+                                        'Content-Type': 'application/json'
                                     }
                                 }
                         ).then(onSuccess, onError).catch(onCatch);

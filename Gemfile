@@ -24,7 +24,7 @@ gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0',          group: :doc
 
 # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
-gem 'spring',        group: :development
+#gem 'spring',        group: :development
 
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
@@ -41,9 +41,10 @@ gem 'spring',        group: :development
 gem 'puma'
 
 #gem 'message_bus', ">= 1.1.1.beta"
-gem 'message_bus', git: 'https://github.com/SamSaffron/message_bus.git'
+gem 'message_bus', '~> 2.0.0.beta', git: 'https://github.com/SamSaffron/message_bus.git'
 
 gem 'passenger', '~> 4.0.52', group: :development  #aws dont need it: http://serverfault.com/a/721020/116341 (chris finne comment)
 
+gem 'redis'
 
 
